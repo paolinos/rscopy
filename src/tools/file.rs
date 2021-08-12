@@ -12,10 +12,16 @@ impl FileHelper{
     
     /**
      */
-    pub fn copy(source:String, destination:String) -> Result {
+    pub fn copy(source:&String, destination:&String, limit_bytes:&Option<u32>) -> Result {
         // Take path
-        let source_path = Path::new(&source);
-        let destination_path = Path::new(&destination);
+        let source_path = Path::new(source);
+        let destination_path = Path::new(destination);
+        
+        let mut megas: u64 = 50 * crate::MEGABYTE as u64;
+
+        if limit_bytes.is_some() {
+            megas = limit_bytes.unwrap() as u64;
+        }
 
         // TODO: need to clear/create empty file, because then we're appending bytes to file
         // TODO: destination file should change the extension, like '.partial' and remove it after copy all files
@@ -33,10 +39,8 @@ impl FileHelper{
 
         let f = File::open(source_path).expect("no file found");
         let metadata = f.metadata().expect("File error");
-
-        let kb = 1024 * 5000; //50000;  // 50mb;
-
         //dbg!(&metadata);
+
         
 
         let mut total = metadata.len();
@@ -44,8 +48,8 @@ impl FileHelper{
         let mut bytes =  0;
 
         while  total > 0{
-            bytes = kb;
-            if kb > total{
+            bytes = megas;
+            if megas > total{
                 bytes = total;
             }
 
@@ -60,7 +64,7 @@ impl FileHelper{
 
             cursorPos += bytes;
             total -= bytes;
-            println!("current copied: {}", cursorPos / 1024000);
+            println!("current copied: {}", cursorPos / (crate::MEGABYTE as u64));
             
             // TODO: this options are to append bytes to existing file. 
             let mut file = fs::OpenOptions::new()
