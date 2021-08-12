@@ -3,26 +3,24 @@ mod tools;
 mod copy;
 use tools::argument::Argument;
 
-use crate::tools::file::FileHelper;
+use tools::file::FileHelper;
+
+// TODO: find a way to put all const in one file. so far we can call this with crate::MEGABYTE
+pub const MEGABYTE: u32 = 1024000;
 
 fn main() {
-    // TODO: change Argument implementation to parse and validate all parameters
-    let args = Argument::getArgs();
-    //println!("{:?}", args);
+    let args = Argument::get();    
+    // Debug
+    //dbg!(&args);
 
-    // TODO:
-    //  source file
-    //  destination
-    // TODO: Update this with the new Argument 
-    if args.len() == 2{
+    if args.is_some() {
+        let data = args.unwrap();
         
-        // TODO: refactor this, Copy should be able to read folder/file
-        // Copy
-        match FileHelper::copy(args[0].to_string(), args[1].to_string()){
+        // TODO: this should receive the args
+        match FileHelper::copy(data.source(), data.destination(), data.byte_limit()){
             Ok(()) => println!("Ok"),
             Err(e) => println!("Error trying to read the message: {}", e)
         };
-       
     }else{
         // TODO: add more information about what logic is need
         // TODO: implement --help should be nice

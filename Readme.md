@@ -9,6 +9,12 @@ Only copy files with absolute path
 ```
 // To run 
 cargo run {source_file} {destination_file}
+
+// Copy file with limit of 50Megas
+cargo run {source_file} {destination_file} -b 50 
+
+// NOTE: Not implemente yet
+cargo run {source_file} {destination} -o {new_name}
 ```
 
 # TODO:
