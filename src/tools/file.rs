@@ -1,4 +1,7 @@
-use std::{env, fmt::{Error, Result}, fs::{self, File}, io::{BufReader, Read, Seek, SeekFrom, Write}, path::Path};
+use std::{fs::{self, File, metadata}, io::{BufReader, Read, Seek, SeekFrom, Write}, path::Path};
+
+use crate::common::errors;
+
 
 //const KB = 1024;
 
@@ -12,10 +15,19 @@ impl FileHelper{
     
     /**
      */
-    pub fn copy(source:&String, destination:&String, limit_bytes:&Option<u32>) -> Result {
+    pub fn copy(source:&str, destination:&str, limit_bytes:&Option<u32>) -> errors::AppResult<()> {
         // Take path
         let source_path = Path::new(source);
         let destination_path = Path::new(destination);
+
+        if source_path.is_dir() {
+            return Err(errors::AppError::new("Unsuported directory copy"));
+        }
+
+        if destination_path.is_dir() {
+            return Err(errors::AppError::new("Unsuported directory destination. please add a file name"));
+        }
+        
         
         let mut megas: u64 = 50 * crate::MEGABYTE as u64;
 
@@ -44,27 +56,27 @@ impl FileHelper{
         
 
         let mut total = metadata.len();
-        let mut cursorPos = 0;
-        let mut bytes =  0;
+        let mut cursor_pos = 0;
+        //let mut bytes =  0;
 
         while  total > 0{
-            bytes = megas;
+            let mut bytes = megas;
             if megas > total{
                 bytes = total;
             }
 
-            println!("Total bytes to copy:{}, Total copied bytes:{}, to copy:{}, ", total, &cursorPos, &bytes);
+            println!("Total bytes to copy:{}, Total copied bytes:{}, to copy:{}, ", total, &cursor_pos, &bytes);
 
             // Create buffer an move the starting position of the stream
             let mut buffer = vec![0; bytes as usize];
             let mut reader = BufReader::new(&f);
             // TODO: Add validation here to retry
-            reader.seek(SeekFrom::Start(cursorPos));
-            reader.read(&mut buffer);
+            reader.seek(SeekFrom::Start(cursor_pos)).unwrap();
+            reader.read(&mut buffer).unwrap();
 
-            cursorPos += bytes;
+            cursor_pos += bytes;
             total -= bytes;
-            println!("current copied: {}", cursorPos / (crate::MEGABYTE as u64));
+            println!("current copied: {}", cursor_pos / (crate::MEGABYTE as u64));
             
             // TODO: this options are to append bytes to existing file. 
             let mut file = fs::OpenOptions::new()
@@ -82,9 +94,9 @@ impl FileHelper{
     /**
      * Delete file if exist or create a new empty file
      */
-    fn clear_file(path:&Path) {
+    pub fn clear_file(path:&Path) {
 
-        if path.exists() {
+        if path.exists() && path.is_file() {
             // Delete file
             fs::remove_file(path).unwrap();
         }
