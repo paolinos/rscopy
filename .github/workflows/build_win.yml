@@ -16,8 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    #- name: Install mingw-w64 to build windows .exe
-    #  run: sudo apt-get install mingw-w64
+    - name: Install mingw-w64 to build windows .exe
+      run: sudo apt-get install mingw-w64
     - name: Install mingw-w64 to build windows .exe
       run: rustup target add x86_64-pc-windows-gnu
     - name: Build Windows
