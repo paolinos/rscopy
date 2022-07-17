@@ -35,8 +35,10 @@ cargo run {source_file} {destination_folder} -o {new_filename}
 ```bash
 # install dependency
 apt-get install mingw-w64
-# build 
+# build debug version
 cargo build --target x86_64-pc-windows-gnu
+# build relesse version
+cargo build --release --target x86_64-pc-windows-gnu
 ```
 
 **examples**
@@ -46,4 +48,7 @@ cargo build --target x86_64-pc-windows-gnu
 
 # copy in linux
 cargo run /tmp/image.jpg /user/tmp/destination
+
+# local example
+cargo run ./tmp/source/image1.jpg ./tmp/destination
 ```
