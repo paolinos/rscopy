@@ -2,9 +2,33 @@ use std::{fs::{self, File, metadata}, io::{BufReader, Read, Seek, SeekFrom, Writ
 
 use crate::common::errors;
 
+fn print_copy(filename: &str, total: &u64, current: &u64) {
+    // Move to beginning of previous line & Clear entire line
+    print!("\x1b[1F\x1b[2K");
+    let percent:f64 = (current * 100 / total) as f64;
+    println!("{}  {}  {}%", filename, get_size(total), percent);   
+}
 
-//const KB = 1024;
+fn get_size(total: &u64)-> String {
 
+    let mut prefix = "bytes";
+    let mut unit = 1;
+    
+    if total > &crate::consts::GIGABYTE {
+        prefix = "gb";
+        unit = crate::consts::GIGABYTE;
+    }
+    else if total > &crate::consts::MEGABYTE {
+        prefix = "mb";
+        unit = crate::consts::MEGABYTE;
+    }
+    else if total > &crate::consts::KILOBYTE {
+        prefix = "kb";
+        unit = crate::consts::KILOBYTE;
+    }
+
+    String::from(format!("{:.3} {}", *total as f64 / unit as f64, prefix))
+}
 
 pub struct FileHelper{
     //source:String,
@@ -15,7 +39,7 @@ impl FileHelper{
     
     /**
      */
-    pub fn copy(source:&str, destination:&str, limit_bytes:&Option<u32>) -> errors::AppResult<()> {
+    pub fn copy(source:&str, destination:&str, limit_bytes:&Option<u64>) -> errors::AppResult<()> {
         // Take path
         let source_path = Path::new(source);
         let destination_path = Path::new(destination);
@@ -28,11 +52,12 @@ impl FileHelper{
             return Err(errors::AppError::new("Unsuported directory destination. please add a file name"));
         }
         
-        
-        let mut megas: u64 = 50 * crate::MEGABYTE as u64;
+        let filename = destination_path.file_name().unwrap().to_str().unwrap();
+
+        let mut megas: u64 = 50 * crate::consts::MEGABYTE as u64;
 
         if limit_bytes.is_some() {
-            megas = limit_bytes.unwrap() as u64;
+            megas = limit_bytes.unwrap();
         }
 
         // TODO: need to clear/create empty file, because then we're appending bytes to file
@@ -46,14 +71,9 @@ impl FileHelper{
         */
         FileHelper::clear_file(destination_path);
 
-
-        println!("The current directory is {:?}", source_path.join(&source) );
-
         let f = File::open(source_path).expect("no file found");
         let metadata = f.metadata().expect("File error");
         //dbg!(&metadata);
-
-        
 
         let mut total = metadata.len();
         let mut cursor_pos = 0;
@@ -65,7 +85,8 @@ impl FileHelper{
                 bytes = total;
             }
 
-            println!("Total bytes to copy:{}, Total copied bytes:{}, to copy:{}, ", total, &cursor_pos, &bytes);
+            //println!("Total bytes to copy:{}, Total copied bytes:{}, to copy:{}, ", total, &cursor_pos, &bytes);
+            
 
             // Create buffer an move the starting position of the stream
             let mut buffer = vec![0; bytes as usize];
@@ -76,7 +97,8 @@ impl FileHelper{
 
             cursor_pos += bytes;
             total -= bytes;
-            println!("current copied: {}", cursor_pos / (crate::MEGABYTE as u64));
+            
+            print_copy(filename, &metadata.len(), &cursor_pos);
             
             // TODO: this options are to append bytes to existing file. 
             let mut file = fs::OpenOptions::new()

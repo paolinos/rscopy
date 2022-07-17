@@ -7,23 +7,10 @@ mod consts;
 
 use tools::argument::Argument;
 
-// TODO: find a way to put all const in one file. so far we can call this with crate::MEGABYTE
-pub const MEGABYTE: u32 = 1024000;
-
 fn main() {
     let args = Argument::get();
     // Debug
     //dbg!(&args);
-
-    // TODO:
-    //  TODO: get required parameters
-    //  TODO: call usecase to copy with options
-    //  TODO: UseCase -> check if source exist && is file
-    //  TODO: UseCase -> check if destination exist && is file, if exist clean file.
-    //  TODO: UseCase -> copy file
-
-
-    println!("Starting program");
 
     let mut errors = String::from("");
 
@@ -31,7 +18,7 @@ fn main() {
         let data = args.unwrap();
 
         match usecases::app::copy_from_to(data){
-            Ok(()) => println!("Ok"),
+            Ok(()) => (),
             Err(e) => {
                 println!("Error trying to read the message: {}", e);
                 errors = e.to_string();
@@ -45,9 +32,12 @@ fn main() {
     if !String::is_empty(&errors){
         // TODO: add more information about what logic is need
         // TODO: implement --help should be nice
-        println!("Nothing to copy");
-        println!("Usage: copyto [SOURCE] [DESTINATION]");
+        
+        println!("\nUsage: copy_file [SOURCE] [DESTINATION] [OPTIONS]\n");
         println!("SOURCE : file/folder to copy");
         println!("DESTINATION: path to copy the file/folder");
+
+        println!("\nOPTIONS:\n");
+        println!("           -b integer     byterate to copy expressed in mb. (default 50mb)");
     }
 }

@@ -27,9 +27,9 @@ pub fn copy_from_to(argument: Argument) -> AppResult<()> {
         to_str = String::from(new_path.to_str().unwrap().clone());
     }
 
-    println!("Starting to copy => source: {}, destination: {}", &from_str, &to_str);
+    println!("Starting to copy => \n source: {}\n destination: {}\n", &from_str, &to_str);
     
-    FileHelper::copy(&from_str, &to_str, &Option::None) 
+    FileHelper::copy(&from_str, &to_str, &argument.byte_limit()) 
 }
 
 
