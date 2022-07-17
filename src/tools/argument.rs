@@ -1,14 +1,12 @@
 use std::env;
 
-
-
 #[derive(Debug)]
 pub struct Argument{
-    source:String,
-    destination:String,
-    byte_limit:Option<u32>,
-    override_files:bool,
-    new_name:Option<String>
+    pub source:String,
+    pub destination:String,
+    pub byte_limit:Option<u64>,
+    pub override_files:bool,
+    pub new_name:Option<String>
 }
 
 impl Argument{
@@ -38,10 +36,10 @@ impl Argument{
 
         let mut source = String::from("");
         let mut destination = String::from("");
-        let mut bytes:Option<u32> = None;
+        let mut bytes:Option<u64> = None;
         let mut new_name: Option<String> = None;
         // TODO: not implemented yet
-        let mut override_files:bool = true;
+        let override_files:bool = true;
         
         let total = args.len();
         let mut pos: usize = 0;
@@ -56,7 +54,7 @@ impl Argument{
                     let propstr = prop.as_str();
                     match propstr {
                         "-b" => {
-                            bytes = Some(iter.next().unwrap().parse::<u32>().unwrap() * crate::MEGABYTE);
+                            bytes = Some(iter.next().unwrap().parse::<u64>().unwrap() * crate::consts::MEGABYTE);
                             pos += 1;
                         },
                         "-o" => {
@@ -88,14 +86,14 @@ impl Argument{
         &self.destination
     }
 
-    pub fn byte_limit(&self) -> &Option<u32> {
+    pub fn byte_limit(&self) -> &Option<u64> {
         &self.byte_limit
     }
 
     pub fn new_name(&self) -> &Option<String> {
         &self.new_name
     }
-
+    
     pub fn override_files(&self) -> &bool {
         &self.override_files
     }
